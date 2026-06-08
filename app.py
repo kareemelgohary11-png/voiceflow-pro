@@ -1,24 +1,12 @@
 from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
-import edge_tts
-import asyncio
+import subprocess
 import tempfile
 import os
+import json
 
 app = Flask(__name__)
 CORS(app)
-
-def run_async(coro):
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_closed():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        return loop.run_until_complete(coro)
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop.run_until_complete(coro)
 
 @app.route('/')
 def index():
@@ -27,7 +15,11 @@ def index():
 @app.route('/voices')
 def get_voices():
     try:
-        voices = run_async(edge_tts.list_voices())
+        result = subprocess.run(
+            ['python', '-c', 'import asyncio; import edge_tts; import json; voices = asyncio.run(edge_tts.list_voices()); print(json.dumps(voices))'],
+            capture_output=True, text=True, timeout=30
+        )
+        voices = json.loads(result.stdout)
         filtered = [
             {
                 'name': v['ShortName'],
@@ -55,16 +47,29 @@ def tts():
     if len(text) > 3000:
         return jsonify({'error': 'النص طويل جداً'}), 400
 
-    async def generate():
-        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as f:
-            tmp_path = f.name
-        communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
-        await communicate.save(tmp_path)
-        return tmp_path
-
     try:
-        tmp_path = run_async(generate())
+        tmp = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
+        tmp_path = tmp.name
+        tmp.close()
+
+        script = f"""
+import asyncio
+import edge_tts
+async def main():
+    c = edge_tts.Communicate({repr(text)}, {repr(voice)}, rate={repr(rate)}, pitch={repr(pitch)})
+    await c.save({repr(tmp_path)})
+asyncio.run(main())
+"""
+        result = subprocess.run(
+            ['python', '-c', script],
+            capture_output=True, text=True, timeout=60
+        )
+
+        if result.returncode != 0:
+            return jsonify({'error': result.stderr}), 500
+
         return send_file(tmp_path, mimetype='audio/mpeg', as_attachment=True, download_name='voiceflow.mp3')
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
