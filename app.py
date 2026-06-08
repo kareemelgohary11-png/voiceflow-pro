@@ -1,12 +1,20 @@
 from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
-import subprocess
+from gtts import gTTS
 import tempfile
 import os
-import json
 
 app = Flask(__name__)
 CORS(app)
+
+VOICES = [
+    {'name': 'ar', 'display': 'عربي', 'gender': 'Female', 'locale': 'ar'},
+    {'name': 'ar-eg', 'display': 'عربي مصري', 'gender': 'Female', 'locale': 'ar'},
+    {'name': 'ar-sa', 'display': 'عربي سعودي', 'gender': 'Female', 'locale': 'ar'},
+    {'name': 'en', 'display': 'English', 'gender': 'Female', 'locale': 'en'},
+    {'name': 'en-us', 'display': 'English US', 'gender': 'Female', 'locale': 'en'},
+    {'name': 'en-gb', 'display': 'English UK', 'gender': 'Female', 'locale': 'en'},
+]
 
 @app.route('/')
 def index():
@@ -14,33 +22,13 @@ def index():
 
 @app.route('/voices')
 def get_voices():
-    try:
-        result = subprocess.run(
-            ['python', '-c', 'import asyncio; import edge_tts; import json; voices = asyncio.run(edge_tts.list_voices()); print(json.dumps(voices))'],
-            capture_output=True, text=True, timeout=30
-        )
-        voices = json.loads(result.stdout)
-        filtered = [
-            {
-                'name': v['ShortName'],
-                'display': v['FriendlyName'],
-                'gender': v['Gender'],
-                'locale': v['Locale']
-            }
-            for v in voices
-            if v['Locale'].startswith('ar') or v['Locale'].startswith('en')
-        ]
-        return jsonify(filtered)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return jsonify(VOICES)
 
 @app.route('/tts', methods=['POST'])
 def tts():
     data = request.json
     text = data.get('text', '').strip()
-    voice = data.get('voice', 'ar-EG-SalmaNeural')
-    rate = data.get('rate', '+0%')
-    pitch = data.get('pitch', '+0Hz')
+    voice = data.get('voice', 'ar')
 
     if not text:
         return jsonify({'error': 'لا يوجد نص'}), 400
@@ -48,28 +36,13 @@ def tts():
         return jsonify({'error': 'النص طويل جداً'}), 400
 
     try:
+        lang = voice if len(voice) == 2 else voice[:2]
+        tts = gTTS(text=text, lang=lang, slow=False)
         tmp = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
         tmp_path = tmp.name
         tmp.close()
-
-        script = f"""
-import asyncio
-import edge_tts
-async def main():
-    c = edge_tts.Communicate({repr(text)}, {repr(voice)}, rate={repr(rate)}, pitch={repr(pitch)})
-    await c.save({repr(tmp_path)})
-asyncio.run(main())
-"""
-        result = subprocess.run(
-            ['python', '-c', script],
-            capture_output=True, text=True, timeout=60
-        )
-
-        if result.returncode != 0:
-            return jsonify({'error': result.stderr}), 500
-
+        tts.save(tmp_path)
         return send_file(tmp_path, mimetype='audio/mpeg', as_attachment=True, download_name='voiceflow.mp3')
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
