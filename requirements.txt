@@ -1,5 +1,4 @@
 flask
 flask-cors
-edge-tts
+gTTS
 gunicorn
-gevent
