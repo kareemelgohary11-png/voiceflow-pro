@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceFlow Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080e;--surface:#111118;--surface2:#181823;--surface3:#20202d;
+  --accent:#7c6dfa;--accent2:#a78bfa;--accent-glow:rgba(124,109,250,0.12);
+  --text:#eeeeff;--text2:#9090b0;--text3:#4a4a6a;
+  --border:rgba(255,255,255,0.05);--border2:rgba(124,109,250,0.25);
+  --success:#2dd4a0;--danger:#f87171;--r:12px;
+}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.ar{font-family:'Noto Kufi Arabic',sans-serif}
+.wrap{max-width:740px;margin:0 auto;padding:2rem 1.25rem}
+
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,#7c6dfa,#a78bfa);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.logo-name{font-size:18px;font-weight:700}
+.logo-tag{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.badge{background:rgba(45,212,160,0.1);border:0.5px solid rgba(45,212,160,0.3);color:#2dd4a0;font-size:11px;padding:5px 14px;border-radius:20px;display:flex;align-items:center;gap:6px}
+.badge-dot{width:6px;height:6px;background:#2dd4a0;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;background:var(--accent-glow);border-radius:50%;filter:blur(50px);pointer-events:none}
+
+textarea{width:100%;min-height:140px;padding:14px;font-family:'Noto Kufi Arabic',sans-serif;font-size:15px;line-height:1.8;background:var(--surface2);color:var(--text);border:0.5px solid var(--border);border-radius:var(--r);resize:vertical;outline:none;transition:border 0.2s;direction:auto}
+textarea:focus{border-color:var(--border2);box-shadow:0 0 0 3px var(--accent-glow)}
+textarea::placeholder{color:var(--text3)}
+
+.char-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.char-count{font-size:11px;color:var(--text3);font-family:'Noto Kufi Arabic',sans-serif}
+.char-limit{font-size:11px;color:var(--text3);font-family:'Noto Kufi Arabic',sans-serif}
+
+.examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ex-btn{font-family:'Noto Kufi Arabic',sans-serif;font-size:11px;padding:4px 10px;background:var(--surface3);color:var(--text2);border:0.5px solid var(--border);border-radius:20px;cursor:pointer;transition:all 0.15s}
+.ex-btn:hover{border-color:var(--border2);color:var(--accent2)}
+
+.section-title{font-size:11px;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-family:'Noto Kufi Arabic',sans-serif}
+.section-title::after{content:'';flex:1;height:0.5px;background:var(--border)}
+
+.filter-row{display:flex;gap:8px;margin-bottom:10px}
+.filter-btn{padding:5px 14px;font-family:'Noto Kufi Arabic',sans-serif;font-size:12px;background:var(--surface3);color:var(--text2);border:0.5px solid var(--border);border-radius:20px;cursor:pointer;transition:all 0.15s}
+.filter-btn.active{background:var(--accent-glow);border-color:var(--border2);color:var(--accent2)}
+
+.voices-list{max-height:200px;overflow-y:auto;padding-left:4px}
+.voices-list::-webkit-scrollbar{width:3px}
+.voices-list::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+.voice-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;margin-bottom:5px}
+.voice-card:hover{border-color:var(--border2)}
+.voice-card.selected{border-color:var(--accent);background:rgba(124,109,250,0.06)}
+.voice-name{font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;color:var(--text)}
+.voice-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.voice-gender{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--surface3);color:var(--text3)}
+
+.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:1rem}
+.slider-field label{font-size:11px;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;display:flex;justify-content:space-between;margin-bottom:8px;font-family:'Noto Kufi Arabic',sans-serif}
+.slider-field label span{color:var(--accent2);font-weight:600}
+input[type=range]{width:100%;height:3px;-webkit-appearance:none;background:var(--surface3);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--accent);border-radius:50%;cursor:pointer;box-shadow:0 0 8px var(--accent-glow)}
+
+.btn-row{display:flex;gap:10px;margin-bottom:1rem}
+.btn-main{flex:1;padding:13px;font-family:'Noto Kufi Arabic',sans-serif;font-size:14px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+.btn-main:hover{background:#6d5ef0;box-shadow:0 4px 20px rgba(124,109,250,0.35)}
+.btn-main:disabled{opacity:0.4;cursor:not-allowed}
+.btn-dl{padding:13px 16px;background:var(--success);color:#fff;border:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px;font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;transition:all 0.2s;white-space:nowrap}
+.btn-dl:hover{background:#26b88c}
+.btn-dl:disabled{opacity:0.4;cursor:not-allowed}
+.btn-sm{padding:13px 14px;background:var(--surface2);color:var(--text2);border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s}
+.btn-sm:hover{background:var(--surface3);border-color:var(--border2);color:var(--text)}
+
+audio{width:100%;border-radius:8px;outline:none;margin-bottom:0.75rem;display:none}
+audio.visible{display:block}
+
+.viz{height:44px;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:2px;overflow:hidden;padding:0 8px}
+.bar{width:2.5px;background:var(--accent);border-radius:2px;height:4px;transition:height 0.08s;opacity:0.7}
+
+.status-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--surface3);flex-shrink:0}
+.dot.on{background:var(--success);box-shadow:0 0 6px var(--success);animation:pulse 1.2s infinite}
+.dot.err{background:var(--danger)}
+.stxt{font-family:'Noto Kufi Arabic',sans-serif;font-size:12px;color:var(--text3)}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface2);border:0.5px solid var(--border2);color:var(--text);font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;padding:10px 22px;border-radius:20px;transition:transform 0.3s;z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.footer{text-align:center;margin-top:2rem;color:var(--text3);font-size:11px;font-family:'Noto Kufi Arabic',sans-serif;padding-bottom:2rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🎙</div>
+      <div>
+        <div class="logo-name">VoiceFlow Pro</div>
+        <div class="logo-tag ar">محول نص لصوت احترافي</div>
+      </div>
+    </div>
+    <div class="badge"><span class="badge-dot"></span> مجاني 100%</div>
+  </div>
+
+  <div class="card">
+    <textarea id="txt" placeholder="اكتب النص هنا بالعربي أو الإنجليزي...&#10;&#10;الحد الأقصى 3000 حرف"></textarea>
+    <div class="char-row">
+      <span class="char-count ar" id="cc">0 حرف</span>
+      <span class="char-limit ar">الحد الأقصى: 3000 حرف</span>
+    </div>
+    <div class="examples">
+      <span class="ex-btn ar" onclick="setEx(0)">🌙 مشهد درامي</span>
+      <span class="ex-btn ar" onclick="setEx(1)">😊 خبر سعيد</span>
+      <span class="ex-btn ar" onclick="setEx(2)">📰 تقرير رسمي</span>
+      <span class="ex-btn" onclick="setEx(3)">🇺🇸 English story</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title ar">اختر الصوت</div>
+    <div class="filter-row">
+      <button class="filter-btn active ar" onclick="filterVoices('all', this)">الكل</button>
+      <button class="filter-btn ar" onclick="filterVoices('ar', this)">🇸🇦 عربي</button>
+      <button class="filter-btn" onclick="filterVoices('en', this)">🇺🇸 English</button>
+    </div>
+    <div class="voices-list" id="voices-list">
+      <div style="text-align:center;padding:1rem;color:var(--text3);font-family:'Noto Kufi Arabic',sans-serif;font-size:13px">
+        جاري تحميل الأصوات... <span class="spinner"></span>
+      </div>
+    </div>
+    <div class="slider-grid">
+      <div class="slider-field">
+        <label class="ar">السرعة <span id="rv">عادي</span></label>
+        <input type="range" id="rate" min="-50" max="50" value="0" step="5">
+      </div>
+      <div class="slider-field">
+        <label class="ar">الطبقة <span id="pv">عادي</span></label>
+        <input type="range" id="pitch" min="-50" max="50" value="0" step="5">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="btn-row">
+      <button class="btn-main ar" id="btn-gen" onclick="generate()">
+        <i class="ti ti-waveform"></i> توليد الصوت
+      </button>
+      <button class="btn-dl ar" id="btn-dl" onclick="downloadAudio()" disabled>
+        <i class="ti ti-download"></i> تنزيل MP3
+      </button>
+      <button class="btn-sm" onclick="copyText()" title="نسخ النص">
+        <i class="ti ti-copy"></i>
+      </button>
+    </div>
+    <audio id="player" controls></audio>
+    <div class="viz"><div id="bars"></div></div>
+    <div class="status-row">
+      <span class="dot" id="dot"></span>
+      <span class="stxt ar" id="stxt">جاهز</span>
+    </div>
+  </div>
+
+  <div class="footer">VoiceFlow Pro · أصوات Microsoft Neural · مجاني بالكامل</div>
+</div>
+
+<div class="toast ar" id="toast"></div>
+
+<script>
+const examples = [
+  'كانت الليلة هادئة تماماً... لا صوت إلا صوت الريح. فجأة، دق الباب بعنف! قلبها توقف للحظة.',
+  'اليوم يوم استثنائي! لقد نجحنا في المشروع بعد أشهر من العمل الشاق. الفريق كله سعيد جداً!',
+  'وفقاً للتقرير السنوي، حققت الشركة نمواً بنسبة خمسة عشر بالمئة مقارنة بالعام الماضي.',
+  'The old lighthouse stood alone on the cliff. Waves crashed below with a thunderous roar. Then silence...'
+];
+
+let allVoices = [], selectedVoice = null, audioUrl = null, vizInt;
+
+function setEx(i) {
+  document.getElementById('txt').value = examples[i];
+  updateChar();
+}
+
+function updateChar() {
+  const l = document.getElementById('txt').value.length;
+  document.getElementById('cc').textContent = l + ' حرف';
+  document.getElementById('cc').style.color = l > 2800 ? 'var(--danger)' : 'var(--text3)';
+}
+document.getElementById('txt').addEventListener('input', updateChar);
+
+document.getElementById('rate').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  document.getElementById('rv').textContent = v === 0 ? 'عادي' : (v > 0 ? '+' + v + '%' : v + '%');
+});
+document.getElementById('pitch').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  document.getElementById('pv').textContent = v === 0 ? 'عادي' : (v > 0 ? '+' + v + 'Hz' : v + 'Hz');
+});
+
+function initBars() {
+  const c = document.getElementById('bars');
+  c.style.display = 'flex'; c.style.alignItems = 'center'; c.style.gap = '2px';
+  for (let i = 0; i < 52; i++) {
+    const b = document.createElement('div'); b.className = 'bar'; c.appendChild(b);
+  }
+}
+initBars();
+
+function animateBars(on) {
+  clearInterval(vizInt);
+  const bars = document.querySelectorAll('.bar');
+  if (!on) { bars.forEach(b => b.style.height = '3px'); return; }
+  vizInt = setInterval(() => bars.forEach(b => b.style.height = (Math.random() * 36 + 4) + 'px'), 80);
+}
+
+function setStatus(type, msg) {
+  document.getElementById('dot').className = 'dot' + (type ? ' ' + type : '');
+  document.getElementById('stxt').textContent = msg;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function loadVoices() {
+  try {
+    const res = await fetch('/voices');
+    allVoices = await res.json();
+    renderVoices(allVoices);
+  } catch(e) {
+    document.getElementById('voices-list').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--danger);font-family:\'Noto Kufi Arabic\',sans-serif;font-size:13px">خطأ في تحميل الأصوات</div>';
+  }
+}
+
+function renderVoices(voices) {
+  if (!voices.length) {
+    document.getElementById('voices-list').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text3);font-family:\'Noto Kufi Arabic\',sans-serif;font-size:13px">لا توجد أصوات</div>';
+    return;
+  }
+  document.getElementById('voices-list').innerHTML = voices.map(v => `
+    <div class="voice-card" id="vc-${v.name}" onclick="selectVoice('${v.name}', '${v.display}')">
+      <div>
+        <div class="voice-name">${v.display}</div>
+        <div class="voice-meta">${v.locale}</div>
+      </div>
+      <span class="voice-gender">${v.gender === 'Female' ? '👩 أنثى' : '👨 ذكر'}</span>
+    </div>
+  `).join('');
+  if (voices.length > 0) selectVoice(voices[0].name, voices[0].display);
+}
+
+function filterVoices(lang, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = lang === 'all' ? allVoices : allVoices.filter(v => v.locale.toLowerCase().startsWith(lang));
+  renderVoices(filtered);
+}
+
+function selectVoice(name, display) {
+  selectedVoice = name;
+  document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
+  const el = document.getElementById('vc-' + name);
+  if (el) el.classList.add('selected');
+}
+
+async function generate() {
+  const text = document.getElementById('txt').value.trim();
+  if (!text) { toast('اكتب نصاً أولاً'); return; }
+  if (!selectedVoice) { toast('اختر صوتاً أولاً'); return; }
+  if (text.length > 3000) { toast('النص طويل جداً، الحد 3000 حرف'); return; }
+
+  const rateVal = parseInt(document.getElementById('rate').value);
+  const pitchVal = parseInt(document.getElementById('pitch').value);
+  const rate = (rateVal >= 0 ? '+' : '') + rateVal + '%';
+  const pitch = (pitchVal >= 0 ? '+' : '') + pitchVal + 'Hz';
+
+  const btn = document.getElementById('btn-gen');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> جاري التوليد...';
+  setStatus('on', 'جاري توليد الصوت...');
+  animateBars(true);
+  document.getElementById('player').classList.remove('visible');
+  document.getElementById('btn-dl').disabled = true;
+  audioUrl = null;
+
+  try {
+    const res = await fetch('/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice: selectedVoice, rate, pitch })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'خطأ في التوليد');
+    }
+
+    const blob = await res.blob();
+    audioUrl = URL.createObjectURL(blob);
+    const player = document.getElementById('player');
+    player.src = audioUrl;
+    player.classList.add('visible');
+    document.getElementById('btn-dl').disabled = false;
+    setStatus('on', 'تم التوليد بنجاح ✓');
+    animateBars(false);
+    player.play();
+    toast('تم توليد الصوت بنجاح!');
+  } catch(e) {
+    setStatus('err', 'خطأ: ' + e.message);
+    animateBars(false);
+    toast('حدث خطأ، حاول مرة أخرى');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-waveform"></i> توليد الصوت';
+}
+
+function downloadAudio() {
+  if (!audioUrl) return;
+  const a = document.createElement('a');
+  a.href = audioUrl;
+  a.download = 'voiceflow-' + Date.now() + '.mp3';
+  a.click();
+  toast('جاري التنزيل...');
+}
+
+function copyText() {
+  const text = document.getElementById('txt').value;
+  if (!text) { toast('لا يوجد نص'); return; }
+  navigator.clipboard.writeText(text).then(() => toast('تم نسخ النص ✓'));
+}
+
+loadVoices();
+</script>
+</body>
+</html>
